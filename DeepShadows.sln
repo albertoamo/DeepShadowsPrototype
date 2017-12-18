@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2017
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeepShadows", "DeepShadows.csproj", "{D47F98CF-5A4B-A1D5-6296-674AB3A4DADC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeepShadows.Editor", "DeepShadows.Editor.csproj", "{2A6C0742-C12D-ECD2-23B5-D1B57E92C28B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D47F98CF-5A4B-A1D5-6296-674AB3A4DADC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D47F98CF-5A4B-A1D5-6296-674AB3A4DADC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D47F98CF-5A4B-A1D5-6296-674AB3A4DADC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D47F98CF-5A4B-A1D5-6296-674AB3A4DADC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A6C0742-C12D-ECD2-23B5-D1B57E92C28B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A6C0742-C12D-ECD2-23B5-D1B57E92C28B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A6C0742-C12D-ECD2-23B5-D1B57E92C28B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A6C0742-C12D-ECD2-23B5-D1B57E92C28B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
