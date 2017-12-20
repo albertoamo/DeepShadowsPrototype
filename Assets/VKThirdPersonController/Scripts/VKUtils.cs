@@ -16,5 +16,4 @@ public class VKUtils
 
         return Mathf.Clamp(angle, min, max);
     }
-
 }

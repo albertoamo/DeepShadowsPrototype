@@ -17,6 +17,7 @@ public class VKThirdPersonCamera : MonoBehaviour
     }
 
     public GameObject targetLookAt;
+    public GameObject dummyTarget;
     public float height = 1.4f;
     public float rightOffset = 0f;
     public float clippingDistance = 2.5f;
@@ -42,19 +43,23 @@ public class VKThirdPersonCamera : MonoBehaviour
     {
         _camera = GetComponent<Camera>();
 
-        if(targetLookAt != null)
-            SetTarget(targetLookAt);
+        // Create a dummy target to look at.
+        dummyTarget = new GameObject("VKDummyTarget");
+        dummyTarget.transform.parent = this.transform.parent;
+
+        if (targetLookAt != null) SetTarget(targetLookAt);
     }
 	
 	// Update is called once per frame
 	void Update ()
     {
-        CameraRotate();
+
     }
 
     private void FixedUpdate()
     {
         CameraMove();
+        CameraRotate();
     }
 
     public void SetTarget(GameObject newTarget)
@@ -62,6 +67,8 @@ public class VKThirdPersonCamera : MonoBehaviour
         targetLookAt = newTarget;
         mouseY = targetLookAt.transform.eulerAngles.x;
         mouseX = targetLookAt.transform.eulerAngles.y;
+        dummyTarget.transform.position = targetLookAt.transform.position;
+        dummyTarget.transform.rotation = targetLookAt.transform.rotation;
     }
 
     public void CameraRotate()
@@ -70,30 +77,30 @@ public class VKThirdPersonCamera : MonoBehaviour
         mouseX += input.x * sensitivity.x;
         mouseY -= input.y * sensitivity.y;
 
-        mouseY = VKUtils.ClampAngle(mouseY, yLimit.x, yLimit.y);
         mouseX = VKUtils.ClampAngle(mouseX, xLimit.x, xLimit.y);
+        mouseY = VKUtils.ClampAngle(mouseY, yLimit.x, yLimit.y);
     }
 
     public void CameraMove()
     {
         if (targetLookAt == null) return;
 
-        // Get director vector to target
-        Vector3 camDir = (-targetLookAt.transform.forward) + (rightOffset * targetLookAt.transform.right).normalized;
-
-        Vector3 targetPos = new Vector3(targetLookAt.transform.position.x, targetLookAt.transform.position.y, targetLookAt.transform.position.z);
+        // Get director vector to target and offset position
+        Vector3 camDir = (-dummyTarget.transform.forward) + (rightOffset * dummyTarget.transform.right).normalized;
+        Vector3 targetPos = new Vector3(dummyTarget.transform.position.x, dummyTarget.transform.position.y, dummyTarget.transform.position.z);
         targetPos += new Vector3(0, height, 0);
 
-        var lookPoint = targetPos + targetLookAt.transform.forward * 2f;
-        lookPoint += (targetLookAt.transform.right * Vector3.Dot(camDir * (clippingDistance), targetLookAt.transform.right));
+        var lookPoint = targetPos + dummyTarget.transform.forward * 2f;
+        lookPoint += (dummyTarget.transform.right * Vector3.Dot(camDir * (clippingDistance), dummyTarget.transform.right));
 
         // Apply transforms to the camera
         transform.position = targetPos + (camDir * (clippingDistance));
         transform.rotation = Quaternion.LookRotation((lookPoint) - transform.position);
 
-        // Apply rotation to the target
+        // Apply transforms to the target
         Quaternion newRot = Quaternion.Euler(mouseY, mouseX, 0);
-        targetLookAt.transform.rotation = Quaternion.Slerp(targetLookAt.transform.rotation, newRot, smoothCameraRotation * Time.deltaTime);
+        dummyTarget.transform.position = targetLookAt.transform.position;
+        dummyTarget.transform.rotation = Quaternion.Slerp(dummyTarget.transform.rotation, newRot, smoothCameraRotation * Time.deltaTime);
 
     }
 

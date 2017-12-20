@@ -31,12 +31,12 @@ public class VKThirdPersonInput : MonoBehaviour {
     // Use this for initialization
     void Start ()
     {
-        charController = GetComponent<VKThirdPersonController>();
-        if (charController != null)
-            charController.Init();
-
         charCamera = FindObjectOfType<VKThirdPersonCamera>();
-        //if (charCamera) charCamera.SetMainTarget(this.transform);
+        charController = GetComponent<VKThirdPersonController>();
+
+        if (charController) charController.Init();
+
+        if (charCamera) charCamera.SetTarget(this.gameObject);
     }
 	
 	// Update is called once per frame
@@ -60,8 +60,8 @@ public class VKThirdPersonInput : MonoBehaviour {
     protected void InputHandle()
     {
         // Camera movement
-        charCamera.input.x = Input.GetAxis(rotateCameraYInput);
-        charCamera.input.y = Input.GetAxis(rotateCameraXInput);
+        charCamera.input.x = Input.GetAxis(rotateCameraXInput);
+        charCamera.input.y = Input.GetAxis(rotateCameraYInput);
 
         // Character movement
         charController.input.x = Input.GetAxis(horizontalInput);
@@ -71,10 +71,8 @@ public class VKThirdPersonInput : MonoBehaviour {
         // just a example to quit the application 
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (!Cursor.visible)
-                Cursor.visible = true;
-            else
-                Application.Quit();
+            if (!Cursor.visible) Cursor.visible = true;
+            else Application.Quit();
         }
 
         if (Input.GetKeyDown(sprintInput))
