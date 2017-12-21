@@ -101,7 +101,6 @@ public class VKThirdPersonCamera : MonoBehaviour
         Quaternion newRot = Quaternion.Euler(mouseY, mouseX, 0);
         dummyTarget.transform.position = targetLookAt.transform.position;
         dummyTarget.transform.rotation = Quaternion.Slerp(dummyTarget.transform.rotation, newRot, smoothCameraRotation * Time.deltaTime);
-
     }
 
     public void CameraClip()

@@ -20,7 +20,7 @@ MonoBehaviour:
   m_ShowMode: 4
   m_Title: 
   m_RootView: {fileID: 5}
-  m_MinSize: {x: 950, y: 392}
+  m_MinSize: {x: 950, y: 300}
   m_MaxSize: {x: 10000, y: 10000}
 --- !u!114 &2
 MonoBehaviour:
@@ -109,7 +109,7 @@ MonoBehaviour:
     y: 0
     width: 1536
     height: 781
-  m_MinSize: {x: 950, y: 392}
+  m_MinSize: {x: 950, y: 300}
   m_MaxSize: {x: 10000, y: 10000}
 --- !u!114 &6
 MonoBehaviour:
@@ -174,7 +174,7 @@ MonoBehaviour:
   m_MinSize: {x: 683, y: 342}
   m_MaxSize: {x: 18008, y: 14042}
   vertical: 1
-  controlID: 111
+  controlID: 25
 --- !u!114 &9
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -199,7 +199,7 @@ MonoBehaviour:
   m_MinSize: {x: 683, y: 342}
   m_MaxSize: {x: 18008, y: 14042}
   vertical: 0
-  controlID: 112
+  controlID: 26
 --- !u!114 &10
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -402,14 +402,14 @@ MonoBehaviour:
     width: 1023
     height: 521
   m_SceneLighting: 1
-  lastFramingTime: 2286.069700520278
+  lastFramingTime: 10464.608631136887
   m_2DMode: 0
   m_isRotationLocked: 0
   m_AudioPlay: 0
   m_Position:
-    m_Target: {x: 10.463695, y: -5.6633873, z: 3.0047083}
+    m_Target: {x: -2.4186602, y: 1.3685771, z: -1.2473247}
     speed: 2
-    m_Value: {x: 10.463695, y: -5.6633873, z: 3.0047083}
+    m_Value: {x: -2.4186602, y: 1.3685771, z: -1.2473247}
   m_RenderMode: 0
   m_ValidateTrueMetals: 0
   m_SceneViewState:
@@ -432,13 +432,13 @@ MonoBehaviour:
       speed: 2
       m_Value: 0
   m_Rotation:
-    m_Target: {x: 0.16617584, y: 0.61831063, z: -0.13589613, w: 0.7560488}
+    m_Target: {x: 0.07636811, y: -0.10299823, z: 0.007935425, w: 0.9917138}
     speed: 2
-    m_Value: {x: 0.16617584, y: 0.61831063, z: -0.13589613, w: 0.7560488}
+    m_Value: {x: 0.07636811, y: -0.10299823, z: 0.007935425, w: 0.9917138}
   m_Size:
-    m_Target: 22
+    m_Target: 1.730679
     speed: 2
-    m_Value: 22
+    m_Value: 1.730679
   m_Ortho:
     m_Target: 0
     speed: 2
@@ -606,23 +606,23 @@ MonoBehaviour:
     height: 710
   m_TreeViewState:
     scrollPos: {x: 0, y: 0}
-    m_SelectedIDs: 
-    m_LastClickedID: 0
-    m_ExpandedIDs: 8efbffff00000000962c0000
+    m_SelectedIDs: 082b0000
+    m_LastClickedID: 11016
+    m_ExpandedIDs: a6fbffff00000000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
-      m_Name: VKThirdPersonCamera
-      m_OriginalName: VKThirdPersonCamera
+      m_Name: 
+      m_OriginalName: 
       m_EditFieldRect:
         serializedVersion: 2
         x: 0
         y: 0
         width: 0
         height: 0
-      m_UserData: 10996
+      m_UserData: 0
       m_IsWaitingForDelay: 0
       m_IsRenaming: 0
-      m_OriginalEventType: 0
+      m_OriginalEventType: 11
       m_IsRenamingFilename: 0
       m_ClientGUIView: {fileID: 13}
     m_SearchString: 
@@ -702,7 +702,7 @@ MonoBehaviour:
     m_ShowAllHits: 0
     m_SearchArea: 0
     m_Folders:
-    - Assets/Invector-3rdPersonController/Basic Locomotion LITE/Scripts/CharacterController
+    - Assets/Invector-3rdPersonController/Basic Locomotion LITE/Scripts/Camera/Editor
   m_ViewMode: 0
   m_StartGridSize: 64
   m_LastFolders: []
@@ -713,7 +713,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 0a220000
     m_LastClickedID: 8714
-    m_ExpandedIDs: 000000005827000010280000222800002a2800004a280000522800005a280000b6280000b8280000382900005a29000060290000a6290000e4290000142a0000162a0000502a0000702a0000
+    m_ExpandedIDs: 00000000562700000e2800002028000028280000482800005028000058280000b4280000b6280000ce28000036290000582900005e290000a4290000e2290000122a0000142a00004e2a00006e2a0000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -738,10 +738,10 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
   m_AssetTreeState:
-    scrollPos: {x: 0, y: 297}
+    scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 000000005827000010280000222800002a2800004a280000522800005a280000b6280000b8280000d0280000382900005a29000060290000a6290000e4290000142a0000162a0000502a0000702a0000
+    m_ExpandedIDs: 0000000056270000762700000e2800002028000028280000482800005028000058280000b4280000b6280000ce2800002c2900003629000040290000582900005e290000a4290000b8290000e2290000122a0000142a00004e2a00006e2a0000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
