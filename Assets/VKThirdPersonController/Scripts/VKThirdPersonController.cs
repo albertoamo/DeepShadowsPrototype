@@ -29,6 +29,7 @@ public class VKThirdPersonController : MonoBehaviour {
     public const float runSpeed = 2.5f;
     public const float crouchSpeed = 2.5f;
     public float playerSpeed;
+    public float inputSpeed;
     public bool isGrounded;
     #endregion
 
@@ -59,7 +60,8 @@ public class VKThirdPersonController : MonoBehaviour {
 
     public void UpdateAnimator()
     {
-
+        _animator.SetBool("IsGrounded", isGrounded);
+        _animator.SetFloat("InputVertical", inputSpeed * .5f, 0.1f, Time.deltaTime);
     }
 
     // Function to control player gravity and vertical downforces
@@ -87,10 +89,10 @@ public class VKThirdPersonController : MonoBehaviour {
     public void ControlMotion()
     {
         // Obtain input strength
-        float speed = Mathf.Abs(input.x) + Mathf.Abs(input.y);
-        speed = Mathf.Clamp(speed, 0, 1f);
+        inputSpeed = Mathf.Abs(input.x) + Mathf.Abs(input.y);
+        inputSpeed = Mathf.Clamp(inputSpeed, 0, 1f);
 
-        Vector3 velY = transform.forward * playerSpeed * speed;
+        Vector3 velY = transform.forward * playerSpeed * inputSpeed;
         velY.y = _rigidbody.velocity.y;
 
         if (input != Vector2.zero)
@@ -105,6 +107,6 @@ public class VKThirdPersonController : MonoBehaviour {
 
         // Apply rigibody force on given direction
         _rigidbody.velocity = velY; // Block if no input given
-        _rigidbody.AddForce(transform.forward * (playerSpeed * speed) * Time.deltaTime, ForceMode.VelocityChange);
+        _rigidbody.AddForce(transform.forward * (playerSpeed * inputSpeed) * Time.deltaTime, ForceMode.VelocityChange);
     }
 }

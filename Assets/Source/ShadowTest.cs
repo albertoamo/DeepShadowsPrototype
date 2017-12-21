@@ -13,6 +13,7 @@ public class ShadowTest : MonoBehaviour {
     public Material shadowMaterial;
     public Material shadowPlayer;
     private CharacterStatus status;
+    public bool isShadow;
 
     private Light[] lights;
     private GameObject target;
@@ -34,13 +35,15 @@ public class ShadowTest : MonoBehaviour {
         UpdatePlayerStatus();
     }
 
+    // Move this function when refactor needed.
     void UpdateInput()
     {
         if (status == CharacterStatus.Physical)
         {
-            if (Input.GetKeyDown(KeyCode.C)) // Change status
+            if (Input.GetKeyDown(KeyCode.C) && isShadow == true) // Change status
             {
-
+                status = CharacterStatus.Shadow;
+                this.transform.GetChild(1).gameObject.SetActive(false);
             }
         }
         else if (status == CharacterStatus.Shadow)
@@ -73,7 +76,7 @@ public class ShadowTest : MonoBehaviour {
 
     void UpdatePlayerStatus()
     {
-        bool isShadow = true;
+        isShadow = true;
 
         for (int i = 0; i < target.transform.childCount; i++)
         {
@@ -97,6 +100,9 @@ public class ShadowTest : MonoBehaviour {
         }
         else
         {
+            if(status == CharacterStatus.Shadow) this.transform.GetChild(1).gameObject.SetActive(true); // Marranada rapida
+
+            status = CharacterStatus.Physical;
             target.GetComponent<MeshRenderer>().material.color = Color.green;
             shadowPlayer.color = Color.red;
         }
@@ -106,7 +112,7 @@ public class ShadowTest : MonoBehaviour {
     {
         target = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
         target.transform.SetParent(this.transform);
-        target.transform.position = this.transform.position;
+        target.transform.position = this.transform.position + new Vector3(0,0.02f,0);
         target.transform.rotation = this.transform.rotation;
         target.transform.localScale = new Vector3(radius, 0.001f, radius);
         target.GetComponent<MeshRenderer>().material = shadowMaterial;
@@ -120,14 +126,14 @@ public class ShadowTest : MonoBehaviour {
             {
                 float lRadius = radius / (x + 1);
                 float t = y / (float)amount;
-                float h = .5f * lRadius * Mathf.Cos(t * 2 * Mathf.PI) + target.transform.localPosition.x;
-                float v = .5f * lRadius * Mathf.Sin(t * 2 * Mathf.PI) + target.transform.localPosition.z;
+                float h = .5f * lRadius * Mathf.Cos(t * 2 * Mathf.PI) + target.transform.position.x;
+                float v = .5f * lRadius * Mathf.Sin(t * 2 * Mathf.PI) + target.transform.position.z;
 
-                PlaceSquaredLed(new Vector3(h, target.transform.localPosition.y, v), ledScale, Color.blue);
+                PlaceSquaredLed(new Vector3(h, target.transform.position.y, v), ledScale, Color.blue);
             }
         }
 
-        PlaceSquaredLed(target.transform.localPosition, ledScale, Color.blue);
+        PlaceSquaredLed(target.transform.position, ledScale, Color.blue);
     }
 
     void PlaceSquaredLed(Vector3 position, Vector3 scale, Color color)
