@@ -16,33 +16,30 @@ public class VKThirdPersonCamera : MonoBehaviour
         }
     }
 
-    public GameObject targetLookAt;
-    public GameObject dummyTarget;
+    [HideInInspector] public GameObject targetLookAt;
+    [HideInInspector] public GameObject dummyTarget;
+    [HideInInspector] public Vector2 input;
+
+    [Header("--- Limit/Sensitivity values ---")]
+    public Vector2 xLimit = new Vector2(-360, 360);
+    public Vector2 yLimit = new Vector2(-40, 80);
+    public Vector2 sensitivity = new Vector2(3, 3);
+
+    [Header("--- Offset values ---")]
     public float height = 1.4f;
     public float rightOffset = 0f;
     public float clippingDistance = 2.5f;
     public float maxClippingDistance = 2.5f;
     public float minClippingDistance = 0.1f;
-
-    public Vector2 xLimit = new Vector2(-360, 360);
-    public Vector2 yLimit = new Vector2(-40, 80);
-    public Vector2 sensitivity = new Vector2(3, 3);
     public float smoothCameraRotation = 12f;
 
-    [HideInInspector] public Vector2 input;
-
-    private Camera _camera;
-    private float distance = 5f;
     private float mouseY = 0f;
     private float mouseX = 0f;
     private float currentHeight;
 
-
     // Use this for initialization
     void Start ()
     {
-        _camera = GetComponent<Camera>();
-
         // Create a dummy target to look at.
         dummyTarget = new GameObject("VKDummyTarget");
         dummyTarget.transform.parent = this.transform.parent;

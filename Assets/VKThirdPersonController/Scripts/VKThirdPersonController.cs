@@ -19,21 +19,22 @@ public class VKThirdPersonController : MonoBehaviour {
     protected float groundDistance;
     protected float jumpHeight = 4f;
     protected float playerHeight = 1.8f;
+    protected const float maxAirDistance = 0.05f;
 
     [Header("--- Rotation values ---")]
     public float rotationSpeed = 10f;
-    public float freeRotationSpeed = 10f;
 
     [Header("--- Movement values ---")]
-    public const float walkSpeed = 2.5f;
-    public const float runSpeed = 2.5f;
-    public const float crouchSpeed = 2.5f;
-    public float playerSpeed;
-    public float inputSpeed;
     public bool isGrounded;
+    public float inputSpeed;
+    public float playerSpeed;
+    public const float walkSpeed = 2.5f;
+    public const float runSpeed = 3.5f;
+    public const float crouchSpeed = 1.5f;
     #endregion
 
     [HideInInspector] public Vector2 input;
+    [HideInInspector] public Vector3 lookDirection;
 
     #region Components               
     [HideInInspector] public Animator _animator;     
@@ -73,7 +74,7 @@ public class VKThirdPersonController : MonoBehaviour {
         groundDistance = groundHit.distance;
 
         // Detect wether we are on air or grounded
-        if (groundDistance >= 0.5f)
+        if (groundDistance >= maxAirDistance)
         {
             isGrounded = false;
             _rigidbody.AddForce(transform.up * gravity * Time.deltaTime, ForceMode.VelocityChange);
@@ -92,21 +93,19 @@ public class VKThirdPersonController : MonoBehaviour {
         inputSpeed = Mathf.Abs(input.x) + Mathf.Abs(input.y);
         inputSpeed = Mathf.Clamp(inputSpeed, 0, 1f);
 
+        if (input != Vector2.zero)
+        {
+            // Apply body rotation depending on looking direction
+            Quaternion freeRotation = Quaternion.LookRotation(lookDirection, transform.up);
+            Quaternion euler = Quaternion.Euler(transform.eulerAngles.x, freeRotation.eulerAngles.y, transform.eulerAngles.z);
+            transform.rotation = Quaternion.Lerp(transform.rotation, euler, rotationSpeed * Time.deltaTime);
+        }
+
+        // Obtain direction vector to apply force with
         Vector3 velY = transform.forward * playerSpeed * inputSpeed;
         velY.y = _rigidbody.velocity.y;
 
-        if (input != Vector2.zero)
-        {
-            // Apply body rotation depending on vectors
-            Vector3 lookDirection = (input.x * Camera.main.transform.right + input.y * Camera.main.transform.forward).normalized;
-            Quaternion freeRotation = Quaternion.LookRotation(lookDirection, transform.up);
-
-            Vector3 euler = new Vector3(transform.eulerAngles.x, freeRotation.eulerAngles.y, transform.eulerAngles.z);
-            transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(euler), freeRotationSpeed * Time.deltaTime);
-        }
-
         // Apply rigibody force on given direction
-        _rigidbody.velocity = velY; // Block if no input given
-        _rigidbody.AddForce(transform.forward * (playerSpeed * inputSpeed) * Time.deltaTime, ForceMode.VelocityChange);
+        _rigidbody.velocity = velY; 
     }
 }

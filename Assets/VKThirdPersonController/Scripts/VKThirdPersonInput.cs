@@ -35,7 +35,6 @@ public class VKThirdPersonInput : MonoBehaviour {
         charController = GetComponent<VKThirdPersonController>();
 
         if (charController) charController.Init();
-
         if (charCamera) charCamera.SetTarget(this.gameObject);
     }
 	
@@ -66,7 +65,8 @@ public class VKThirdPersonInput : MonoBehaviour {
         // Character movement
         charController.input.x = Input.GetAxis(horizontalInput);
         charController.input.y = Input.GetAxis(verticallInput);
-
+        charController.lookDirection = (charController.input.x * charCamera.transform.right + charController.input.y * charCamera.transform.forward).normalized;
+       
         #region InputKeys
         // just a example to quit the application 
         if (Input.GetKeyDown(KeyCode.Escape))

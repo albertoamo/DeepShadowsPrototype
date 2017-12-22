@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ShadowTest : MonoBehaviour {
+public class ShadowController : MonoBehaviour {
 
     public enum CharacterStatus
     {
@@ -12,15 +12,14 @@ public class ShadowTest : MonoBehaviour {
 
     public Material shadowMaterial;
     public Material shadowPlayer;
-    private CharacterStatus status;
     public bool isShadow;
 
     private Light[] lights;
     private GameObject target;
+    private CharacterStatus status;
 
     void Start()
     {
-
         // Initialization player variables
         Cursor.visible = false;
         status = CharacterStatus.Physical;
@@ -29,7 +28,7 @@ public class ShadowTest : MonoBehaviour {
         lights = FindObjectsOfType(typeof(Light)) as Light[];
     }
 
-    void Update()
+    void FixedUpdate()
     {
         UpdateInput();
         UpdatePlayerStatus();
@@ -38,17 +37,10 @@ public class ShadowTest : MonoBehaviour {
     // Move this function when refactor needed.
     void UpdateInput()
     {
-        if (status == CharacterStatus.Physical)
+        if (Input.GetKeyDown(KeyCode.C) && isShadow == true) // Change status
         {
-            if (Input.GetKeyDown(KeyCode.C) && isShadow == true) // Change status
-            {
-                status = CharacterStatus.Shadow;
-                this.transform.GetChild(1).gameObject.SetActive(false);
-            }
-        }
-        else if (status == CharacterStatus.Shadow)
-        {
-
+            ExitShadowMode();
+            EnterShadowMode();
         }
 
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -56,6 +48,22 @@ public class ShadowTest : MonoBehaviour {
             Debug.Log("Escape button pressed");
             Cursor.visible = !Cursor.visible;
         }
+    }
+
+    public void EnterShadowMode()
+    {
+        if (status != CharacterStatus.Physical) return;
+
+        status = CharacterStatus.Shadow;
+        this.transform.GetChild(1).gameObject.SetActive(false);
+    }
+
+    public void ExitShadowMode()
+    {
+        if (status != CharacterStatus.Shadow) return;
+
+        status = CharacterStatus.Physical;
+        this.transform.GetChild(1).gameObject.SetActive(true);
     }
 
     public bool IsPointInShadows(Vector3 point)
@@ -74,9 +82,21 @@ public class ShadowTest : MonoBehaviour {
         return true;
     }
 
-    void UpdatePlayerStatus()
+    // Refactored function
+    public bool IsPlayerInShadows()
     {
-        isShadow = true;
+        for (int i = 0; i < target.transform.childCount; i++)
+        {
+            if (!IsPointInShadows(target.transform.GetChild(i).transform.position))
+                return false;
+        }
+
+        return true;
+    }
+
+    public bool IsPlayerInShadowsLed()
+    {
+        bool shadowMode = true;
 
         for (int i = 0; i < target.transform.childCount; i++)
         {
@@ -88,10 +108,17 @@ public class ShadowTest : MonoBehaviour {
             }
             else
             {
-                isShadow = false;
+                shadowMode = false;
                 child.GetComponent<MeshRenderer>().material.color = Color.blue;
             }
         }
+
+        return shadowMode;
+    }
+
+    public void UpdatePlayerStatus()
+    {
+        isShadow = IsPlayerInShadowsLed();
 
         if (isShadow)
         {
@@ -100,9 +127,7 @@ public class ShadowTest : MonoBehaviour {
         }
         else
         {
-            if(status == CharacterStatus.Shadow) this.transform.GetChild(1).gameObject.SetActive(true); // Marranada rapida
-
-            status = CharacterStatus.Physical;
+            ExitShadowMode();
             target.GetComponent<MeshRenderer>().material.color = Color.green;
             shadowPlayer.color = Color.red;
         }
@@ -146,5 +171,4 @@ public class ShadowTest : MonoBehaviour {
         childSource.GetComponent<MeshRenderer>().material.color = color;
         Destroy(childSource.GetComponent<BoxCollider>());
     }
-
 }
