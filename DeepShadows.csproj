@@ -229,7 +229,7 @@
     <Compile Include="Assets\Invector-3rdPersonController\Basic Locomotion LITE\Scripts\Generic\vExtensions.cs" />
     <Compile Include="Assets\Invector-3rdPersonController\Basic Locomotion LITE\Scripts\Generic\vPickupItem.cs" />
     <Compile Include="Assets\Source\RotateLight.cs" />
-    <Compile Include="Assets\Source\ShadowController.cs" />
+    <Compile Include="Assets\VKThirdPersonController\Scripts\VKShadowController.cs" />
     <Compile Include="Assets\VKThirdPersonController\Scripts\VKThirdPersonCamera.cs" />
     <Compile Include="Assets\VKThirdPersonController\Scripts\VKThirdPersonController.cs" />
     <Compile Include="Assets\VKThirdPersonController\Scripts\VKThirdPersonInput.cs" />

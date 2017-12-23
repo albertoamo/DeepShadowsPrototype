@@ -66,6 +66,7 @@ public class VKThirdPersonCamera : MonoBehaviour
         mouseX = targetLookAt.transform.eulerAngles.y;
         dummyTarget.transform.position = targetLookAt.transform.position;
         dummyTarget.transform.rotation = targetLookAt.transform.rotation;
+        //dummyTarget.transform.parent = targetLookAt.transform.parent;
     }
 
     public void CameraRotate()

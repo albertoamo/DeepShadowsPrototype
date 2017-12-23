@@ -24,18 +24,24 @@ public class VKThirdPersonInput : MonoBehaviour {
     [HideInInspector] public bool keepDirection;
 
     protected VKThirdPersonCamera charCamera;
-    protected VKThirdPersonController charController;            
+    protected VKThirdPersonController charController;
+    protected VKShadowController charShadowController;
 
     #endregion
 
     // Use this for initialization
     void Start ()
     {
+        // Initialization player variables
+        Cursor.visible = false;
+
         charCamera = FindObjectOfType<VKThirdPersonCamera>();
         charController = GetComponent<VKThirdPersonController>();
+        charShadowController = FindObjectOfType<VKShadowController>();
 
         if (charController) charController.Init();
         if (charCamera) charCamera.SetTarget(this.gameObject);
+        if (charShadowController) charShadowController.Init();
     }
 	
 	// Update is called once per frame
@@ -48,12 +54,14 @@ public class VKThirdPersonInput : MonoBehaviour {
     protected virtual void FixedUpdate()
     {
         // TO-DO
+        charController.UpdatePlayerStatus(charShadowController.target, charShadowController.IsPlayerInShadowsLed());
     }
 
     protected virtual void LateUpdate()
     {
-        if (charController == null) return;	    
-        InputHandle(); 
+        if (charController == null) return;	  
+        
+        InputHandle();
     }
 
     protected void InputHandle()
@@ -84,6 +92,26 @@ public class VKThirdPersonInput : MonoBehaviour {
         {
             //charController.Jump();
         }
+
+        // ShadowDiving related input
+        if (Input.GetMouseButtonDown(0) && charShadowController.isShadow == true) // Change status
+        {
+            // Fix this in the future
+            if(charController.ExitShadowMode(charShadowController.target))
+            {
+
+            }
+            else if(charController.EnterShadowMode(charShadowController.target))
+            {
+
+            }
+        }
+
+        if(Input.GetMouseButtonDown(1))
+        {
+            Physics.gravity = new Vector3(9.8f, 0, 0);
+        }
+
         #endregion
     }
 }

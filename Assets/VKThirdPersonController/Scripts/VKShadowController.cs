@@ -2,68 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ShadowController : MonoBehaviour {
-
-    public enum CharacterStatus
-    {
-        Physical,
-        Shadow
-    }
-
+public class VKShadowController : MonoBehaviour
+{
     public Material shadowMaterial;
     public Material shadowPlayer;
     public bool isShadow;
 
     private Light[] lights;
-    private GameObject target;
-    private CharacterStatus status;
+    public GameObject target;
 
-    void Start()
+    public void Init()
     {
-        // Initialization player variables
-        Cursor.visible = false;
-        status = CharacterStatus.Physical;
-
-        GenerateShadowColliders(2, 10, 0.65f);
+        GenerateShadowColliders(2, 10, 0.35f);
         lights = FindObjectsOfType(typeof(Light)) as Light[];
-    }
-
-    void FixedUpdate()
-    {
-        UpdateInput();
-        UpdatePlayerStatus();
-    }
-
-    // Move this function when refactor needed.
-    void UpdateInput()
-    {
-        if (Input.GetKeyDown(KeyCode.C) && isShadow == true) // Change status
-        {
-            ExitShadowMode();
-            EnterShadowMode();
-        }
-
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            Debug.Log("Escape button pressed");
-            Cursor.visible = !Cursor.visible;
-        }
-    }
-
-    public void EnterShadowMode()
-    {
-        if (status != CharacterStatus.Physical) return;
-
-        status = CharacterStatus.Shadow;
-        this.transform.GetChild(1).gameObject.SetActive(false);
-    }
-
-    public void ExitShadowMode()
-    {
-        if (status != CharacterStatus.Shadow) return;
-
-        status = CharacterStatus.Physical;
-        this.transform.GetChild(1).gameObject.SetActive(true);
     }
 
     public bool IsPointInShadows(Vector3 point)
@@ -96,7 +47,7 @@ public class ShadowController : MonoBehaviour {
 
     public bool IsPlayerInShadowsLed()
     {
-        bool shadowMode = true;
+        isShadow = true;
 
         for (int i = 0; i < target.transform.childCount; i++)
         {
@@ -108,29 +59,12 @@ public class ShadowController : MonoBehaviour {
             }
             else
             {
-                shadowMode = false;
+                isShadow = false;
                 child.GetComponent<MeshRenderer>().material.color = Color.blue;
             }
         }
 
-        return shadowMode;
-    }
-
-    public void UpdatePlayerStatus()
-    {
-        isShadow = IsPlayerInShadowsLed();
-
-        if (isShadow)
-        {
-            target.GetComponent<MeshRenderer>().material.color = Color.yellow;
-            shadowPlayer.color = Color.yellow;
-        }
-        else
-        {
-            ExitShadowMode();
-            target.GetComponent<MeshRenderer>().material.color = Color.green;
-            shadowPlayer.color = Color.red;
-        }
+        return isShadow;
     }
 
     void GenerateShadowColliders(int levels, int amount, float radius)
@@ -139,7 +73,7 @@ public class ShadowController : MonoBehaviour {
         target.transform.SetParent(this.transform);
         target.transform.position = this.transform.position + new Vector3(0,0.02f,0);
         target.transform.rotation = this.transform.rotation;
-        target.transform.localScale = new Vector3(radius, 0.001f, radius);
+        target.transform.localScale = new Vector3(radius * 2, 0.001f, radius * 2);
         target.GetComponent<MeshRenderer>().material = shadowMaterial;
         target.GetComponent<MeshRenderer>().material.color = Color.green;
         Vector3 ledScale = new Vector3(0.05f, 0.05f, 0.05f);
@@ -149,7 +83,7 @@ public class ShadowController : MonoBehaviour {
         {
             for (int y = 0; y < amount; y++)
             {
-                float lRadius = radius / (x + 1);
+                float lRadius = (2 * radius) / (x + 1);
                 float t = y / (float)amount;
                 float h = .5f * lRadius * Mathf.Cos(t * 2 * Mathf.PI) + target.transform.position.x;
                 float v = .5f * lRadius * Mathf.Sin(t * 2 * Mathf.PI) + target.transform.position.z;
