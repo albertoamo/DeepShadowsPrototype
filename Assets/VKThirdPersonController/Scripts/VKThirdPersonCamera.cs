@@ -55,6 +55,7 @@ public class VKThirdPersonCamera : MonoBehaviour
 
     private void FixedUpdate()
     {
+        CameraClip();
         CameraMove();
         CameraRotate();
     }
@@ -69,13 +70,21 @@ public class VKThirdPersonCamera : MonoBehaviour
         //dummyTarget.transform.parent = targetLookAt.transform.parent;
     }
 
+    public Vector3 GetCameraDirection(Vector2 input)
+    {
+        if(height == 0)
+            return (input.x * transform.right + input.y * transform.up).normalized;
+        else
+            return (input.x * transform.right + input.y * transform.forward).normalized;
+    }
+
     public void CameraRotate()
     {
         // free rotation 
         mouseX += input.x * sensitivity.x;
         mouseY -= input.y * sensitivity.y;
 
-        mouseX = VKUtils.ClampAngle(mouseX, xLimit.x, xLimit.y);
+        mouseX = VKUtils.ClampAngle(mouseX, xLimit.x, xLimit.y); //Edit this when shadow-diving mode.
         mouseY = VKUtils.ClampAngle(mouseY, yLimit.x, yLimit.y);
     }
 
@@ -103,7 +112,13 @@ public class VKThirdPersonCamera : MonoBehaviour
 
     public void CameraClip()
     {
-        // TO-DO
         // Clip camera using raycasts
+        // Rework needed here to fix special cases
+        
+        RaycastHit cameraHit;
+        Vector3 direction = (transform.position - dummyTarget.transform.position).normalized;
+
+        if(Physics.Raycast(new Ray(dummyTarget.transform.position, direction), out cameraHit, 8, 5))
+            clippingDistance = Mathf.Clamp(cameraHit.distance - 0.2f, minClippingDistance, maxClippingDistance);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class VKThirdPersonController : MonoBehaviour {
 
@@ -12,18 +13,29 @@ public class VKThirdPersonController : MonoBehaviour {
         IsCrouching,
         isShadow
     }
+
     [Header("--- GameObjects ---")]
     public GameObject bodyPlayer;
+    public GameObject staminaBar;
+    public Image staminaValue;
 
     [Header("--- Offset values ---")]
-    protected float gravity = -9.8f;
+    protected float gravity = 9.8f;
     protected float slopeLimit = 45f;
     protected float groundDistance;
     protected float jumpHeight = 4f;
-    protected const float maxAirDistance = 0.05f;
+    protected const float maxAirDistance = 0.2f;
+    protected const float maxAirDropOutDistance = 0.6f;
+    protected static Vector3 nGravity = new Vector3(0, -9.8f, 0);
 
-    [Header("--- Rotation values ---")]
-    public float rotationSpeed = 10f;
+    protected Vector3 previousPosition;
+
+    [Header("--- Stamina values ---")]
+    public float stamina = 100f;
+    public float maxStamina = 100f;
+    public float minStamina = 0f;
+    public float dcrStaminaGround = 0.02f;
+    public float dcrStaminaWall = 0.08f;
 
     [Header("--- Movement values ---")]
     [HideInInspector] public bool isGrounded;
@@ -32,6 +44,7 @@ public class VKThirdPersonController : MonoBehaviour {
     public const float walkSpeed = 9f;
     public const float runSpeed = 10f;
     public const float crouchSpeed = 7f;
+    public const float rotationSpeed = 10f;
     #endregion
 
     [HideInInspector] public Vector2 input;
@@ -49,6 +62,8 @@ public class VKThirdPersonController : MonoBehaviour {
     {
         playerSpeed = walkSpeed;
         characterStatus = StatusType.IsWalking;
+        staminaValue = staminaBar.GetComponent<Image>();
+        staminaBar.transform.parent.gameObject.SetActive(false);
 
         _animator = GetComponent<Animator>();
         _rigidbody = GetComponent<Rigidbody>();
@@ -59,8 +74,8 @@ public class VKThirdPersonController : MonoBehaviour {
     public void UpdateController ()
     {
         CheckGround(); // Gravity physical force
+        ControlShadow(); // Shadow first or it will force player down!
         ControlMotion(); // Movement WASD
-        ControlShadow();
     }
 
     public void UpdateAnimator()
@@ -74,34 +89,34 @@ public class VKThirdPersonController : MonoBehaviour {
     {
         // Check distance to ground
         RaycastHit groundHit;
-        Physics.Raycast(new Ray(transform.position, -transform.up), out groundHit);
+        Physics.Raycast(new Ray(transform.position + transform.up * 0.1f, -transform.up), out groundHit);
         groundDistance = groundHit.distance;
 
         // Detect wether we are on air or grounded
         if (groundDistance >= maxAirDistance)
         {
             isGrounded = false;
-            //_rigidbody.AddForce(transform.up * gravity * Time.deltaTime, ForceMode.Acceleration);
         }
         else
         {
             isGrounded = true;
-            //_rigidbody.AddForce(transform.up * (gravity * 2 * Time.deltaTime), ForceMode.Acceleration);
         }
     }
 
     // Function to control player motion, WASD
     public void ControlMotion()
     {
+        if (isGrounded == false) return;
+
         // Obtain input strength
         inputSpeed = Mathf.Abs(input.x) + Mathf.Abs(input.y);
         inputSpeed = Mathf.Clamp(inputSpeed, 0, 1f);
+        Vector3 lookDir = Vector3.ProjectOnPlane(lookDirection, Physics.gravity);
 
-        if (input != Vector2.zero)
+        if (input != Vector2.zero && lookDir != Vector3.zero)
         {
             // Apply body rotation depending on looking direction
-            Quaternion freeRotation = Quaternion.LookRotation(lookDirection, transform.up);
-            Quaternion euler = Quaternion.Euler(transform.eulerAngles.x, freeRotation.eulerAngles.y, transform.eulerAngles.z);
+            Quaternion euler = Quaternion.LookRotation(lookDir, transform.up);
             transform.rotation = Quaternion.Lerp(transform.rotation, euler, rotationSpeed * Time.deltaTime);
         }
 
@@ -116,22 +131,65 @@ public class VKThirdPersonController : MonoBehaviour {
 
     public void ControlShadow()
     {
-        //if (characterStatus == StatusType.isShadow)
-        //{
-        //    RaycastHit groundHit;
-        //    Physics.Raycast(new Ray(transform.position, transform.forward), out groundHit);
-        //    Debug.Log(groundHit.distance);
-        //    if (groundHit.distance < 0.4f)
-        //    {
-        //        Debug.Log("Triying to walk on wall");
-        //        VKThirdPersonCamera charCamera = FindObjectOfType<VKThirdPersonCamera>();
-        //        charCamera.dummyTarget.transform.right = groundHit.normal;
-        //        charCamera.targetLookAt.transform.right = groundHit.normal;
-        //        this.transform.right = groundHit.normal;
-        //        Physics.gravity = -groundHit.normal.normalized * 9.8f;
-        //        characterStatus = StatusType.IsCrouching;
-        //    }
-        //}
+        if (groundDistance > maxAirDropOutDistance)
+        {
+            ExitShadowMode();
+            return;
+        }
+
+        if (characterStatus == StatusType.isShadow)
+        {
+            RaycastHit groundHit, groundHitConvex;
+            Vector3 originPoint = (transform.position + 0.01f * transform.up) + _capsuleCollider.radius * transform.forward;
+            bool hit = Physics.Raycast(new Ray((transform.position + 0.01f * transform.up), transform.forward), out groundHit, 0.45f, 5);
+            bool hitConvex = Physics.Raycast(new Ray(originPoint,-(transform.forward + transform.up).normalized), out groundHitConvex, 1f, 5);
+
+            if (hit && groundHit.distance < 0.4f)
+            {
+                if (Vector3.Dot(-groundHit.normal.normalized, nGravity) > -0.1f)
+                {
+                    Vector3 myForward = Vector3.Cross(transform.right, groundHit.normal);
+                    transform.rotation = Quaternion.LookRotation(myForward, groundHit.normal);
+                    transform.position = transform.position + _capsuleCollider.radius * transform.forward;
+                    Physics.gravity = -groundHit.normal.normalized * gravity;
+                }
+            }
+
+            if(!hit && hitConvex && groundHitConvex.distance > _capsuleCollider.radius && groundHitConvex.distance < 1f)
+            {
+                if (Vector3.Dot(-groundHitConvex.normal.normalized, nGravity) > -0.1f)
+                {
+                    Vector3 myForward = Vector3.Cross(transform.right, groundHitConvex.normal);
+                    transform.rotation = Quaternion.LookRotation(myForward, groundHitConvex.normal);
+                    transform.position = transform.position + _capsuleCollider.radius * transform.forward; // offset forward
+                    Physics.gravity = -groundHitConvex.normal.normalized * gravity;
+                }
+            }
+
+            UpdateStamina();
+        }
+    }
+
+    public void UpdateStamina()
+    {
+        // Three stamina state changes
+
+        if (Physics.gravity == nGravity)
+        {
+            if(previousPosition == transform.position)
+                stamina = Mathf.Clamp(stamina - (0.5f * dcrStaminaGround + Time.deltaTime), minStamina, maxStamina);
+            else
+                stamina = Mathf.Clamp(stamina - (dcrStaminaGround + Time.deltaTime), minStamina, maxStamina);
+        }
+        else
+        {
+            stamina = Mathf.Clamp(stamina - (dcrStaminaWall + Time.deltaTime), minStamina, maxStamina);
+        }
+
+        staminaValue.fillAmount = stamina / maxStamina;
+
+        if (stamina == 0)
+            ExitShadowMode();
     }
 
     public void UpdatePlayerStatus(GameObject target, bool isShadow)
@@ -154,29 +212,41 @@ public class VKThirdPersonController : MonoBehaviour {
         if (characterStatus != StatusType.IsWalking) return false;
 
         characterStatus = StatusType.isShadow;
-        this.transform.GetChild(1).gameObject.SetActive(false);
         _capsuleCollider.height = _capsuleCollider.radius;
         _capsuleCollider.center = new Vector3(0, _capsuleCollider.radius, 0);
+        transform.GetChild(1).gameObject.SetActive(false);
 
         VKThirdPersonCamera charCamera = FindObjectOfType<VKThirdPersonCamera>();
         charCamera.SetTarget(target);
         charCamera.height = 0;
 
+        Physics.IgnoreLayerCollision(8, 8, true);
+        staminaBar.transform.parent.gameObject.SetActive(true);
+
         return true;
     }
 
-    public bool ExitShadowMode(GameObject target)
-    {
+    public bool ExitShadowMode(GameObject target = null)
+    { 
         if (characterStatus != StatusType.isShadow) return false;
 
         characterStatus = StatusType.IsWalking;
-        this.transform.GetChild(1).gameObject.SetActive(true);
         _capsuleCollider.height = 1.9f;
         _capsuleCollider.center = new Vector3(0, 0.96f, 0);
+
+        transform.GetChild(1).gameObject.SetActive(true);
+        staminaBar.transform.parent.gameObject.SetActive(false);
 
         VKThirdPersonCamera charCamera = FindObjectOfType<VKThirdPersonCamera>();
         charCamera.SetTarget(this.gameObject);
         charCamera.height = 1.4f;
+
+        Physics.IgnoreLayerCollision(8, 8, false);
+        Physics.gravity = nGravity;
+        transform.up = Vector3.up;
+
+        // FULL STAMINA REGEN ON EXIT
+        stamina = maxStamina;
 
         return true;
     }

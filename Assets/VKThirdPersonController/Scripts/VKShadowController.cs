@@ -26,7 +26,7 @@ public class VKShadowController : MonoBehaviour
                 continue;
 
             float maxDist = Vector3.Distance(point, light.transform.position); // Optimize this part in the future
-            if (!Physics.Raycast(point + new Vector3(0, 0.02f, 0), -light.transform.forward, maxDist, 5))
+            if (!Physics.Raycast(point, -light.transform.forward, maxDist, 5))
                 return false;
         }
 
@@ -53,7 +53,7 @@ public class VKShadowController : MonoBehaviour
         {
             GameObject child = target.transform.GetChild(i).gameObject;
 
-            if (IsPointInShadows(child.transform.position))
+            if (IsPointInShadows(child.transform.position + child.transform.up * 0.05f)) // Hardcoded for debug purposes
             {
                 child.GetComponent<MeshRenderer>().material.color = Color.red;
             }
@@ -76,14 +76,16 @@ public class VKShadowController : MonoBehaviour
         target.transform.localScale = new Vector3(radius * 2, 0.001f, radius * 2);
         target.GetComponent<MeshRenderer>().material = shadowMaterial;
         target.GetComponent<MeshRenderer>().material.color = Color.green;
+        target.layer = 8;
         Vector3 ledScale = new Vector3(0.05f, 0.05f, 0.05f);
         Destroy(target.GetComponent<CapsuleCollider>());
 
+        float nradius = (2 * (radius - 0.02f)); // Hardcoded for colliding purposes
         for (int x = 0; x < levels; x++)
         {
             for (int y = 0; y < amount; y++)
             {
-                float lRadius = (2 * radius) / (x + 1);
+                float lRadius = nradius / (x + 1);
                 float t = y / (float)amount;
                 float h = .5f * lRadius * Mathf.Cos(t * 2 * Mathf.PI) + target.transform.position.x;
                 float v = .5f * lRadius * Mathf.Sin(t * 2 * Mathf.PI) + target.transform.position.z;
@@ -103,6 +105,7 @@ public class VKShadowController : MonoBehaviour
         childSource.transform.localScale = scale;
         childSource.GetComponent<MeshRenderer>().material = shadowMaterial;
         childSource.GetComponent<MeshRenderer>().material.color = color;
+        childSource.layer = 8;
         Destroy(childSource.GetComponent<BoxCollider>());
     }
 }

@@ -73,7 +73,7 @@ public class VKThirdPersonInput : MonoBehaviour {
         // Character movement
         charController.input.x = Input.GetAxis(horizontalInput);
         charController.input.y = Input.GetAxis(verticallInput);
-        charController.lookDirection = (charController.input.x * charCamera.transform.right + charController.input.y * charCamera.transform.forward).normalized;
+        charController.lookDirection = charCamera.GetCameraDirection(charController.input);
        
         #region InputKeys
         // just a example to quit the application 
@@ -105,11 +105,6 @@ public class VKThirdPersonInput : MonoBehaviour {
             {
 
             }
-        }
-
-        if(Input.GetMouseButtonDown(1))
-        {
-            Physics.gravity = new Vector3(9.8f, 0, 0);
         }
 
         #endregion
