@@ -34,6 +34,7 @@ public class VKThirdPersonController : MonoBehaviour {
     public float stamina = 100f;
     public float maxStamina = 100f;
     public float minStamina = 0f;
+    public float dcrStaminaOnPlaceMultiplier = 0.5f;
     public float dcrStaminaGround = 0.02f;
     public float dcrStaminaWall = 0.08f;
 
@@ -52,8 +53,8 @@ public class VKThirdPersonController : MonoBehaviour {
     [HideInInspector] public StatusType characterStatus;
 
     #region Components               
-    [HideInInspector] public Animator _animator;     
-    [HideInInspector] public Rigidbody _rigidbody; 
+    [HideInInspector] public Animator _animator;
+    [HideInInspector] public Rigidbody _rigidbody;
     [HideInInspector] public CapsuleCollider _capsuleCollider;
     #endregion
 
@@ -68,10 +69,12 @@ public class VKThirdPersonController : MonoBehaviour {
         _animator = GetComponent<Animator>();
         _rigidbody = GetComponent<Rigidbody>();
         _capsuleCollider = GetComponent<CapsuleCollider>();
+
+        Physics.gravity = nGravity;
     }
 
     // Update is called once per frame
-    public void UpdateController ()
+    public void UpdateController()
     {
         CheckGround(); // Gravity physical force
         ControlShadow(); // Shadow first or it will force player down!
@@ -142,7 +145,7 @@ public class VKThirdPersonController : MonoBehaviour {
             RaycastHit groundHit, groundHitConvex;
             Vector3 originPoint = (transform.position + 0.01f * transform.up) + _capsuleCollider.radius * transform.forward;
             bool hit = Physics.Raycast(new Ray((transform.position + 0.01f * transform.up), transform.forward), out groundHit, 0.45f, 5);
-            bool hitConvex = Physics.Raycast(new Ray(originPoint,-(transform.forward + transform.up).normalized), out groundHitConvex, 1f, 5);
+            bool hitConvex = Physics.Raycast(new Ray(originPoint, -(transform.forward + transform.up).normalized), out groundHitConvex, 1f, 5);
 
             if (hit && groundHit.distance < 0.4f)
             {
@@ -155,7 +158,7 @@ public class VKThirdPersonController : MonoBehaviour {
                 }
             }
 
-            if(!hit && hitConvex && groundHitConvex.distance > _capsuleCollider.radius && groundHitConvex.distance < 1f)
+            if (!hit && hitConvex && groundHitConvex.distance > _capsuleCollider.radius && groundHitConvex.distance < 1f)
             {
                 if (Vector3.Dot(-groundHitConvex.normal.normalized, nGravity) > -0.1f)
                 {
@@ -172,21 +175,18 @@ public class VKThirdPersonController : MonoBehaviour {
 
     public void UpdateStamina()
     {
-        // Three stamina state changes
 
-        if (Physics.gravity == nGravity)
-        {
-            if(previousPosition == transform.position)
-                stamina = Mathf.Clamp(stamina - (0.5f * dcrStaminaGround + Time.deltaTime), minStamina, maxStamina);
-            else
-                stamina = Mathf.Clamp(stamina - (dcrStaminaGround + Time.deltaTime), minStamina, maxStamina);
-        }
-        else
-        {
-            stamina = Mathf.Clamp(stamina - (dcrStaminaWall + Time.deltaTime), minStamina, maxStamina);
-        }
+        /* Determine decremental depending if we are in ground mode or wall mode */
+        float currentDcrStamina = (Physics.gravity == nGravity) ? dcrStaminaGround : dcrStaminaWall;
+
+        /* Determine decremental multiplier if we are in the same position or moving */
+        float currentDcrOnPlaceMultiplier = (previousPosition == transform.position) ? dcrStaminaOnPlaceMultiplier : 1f;
+
+        stamina = Mathf.Clamp(stamina - (currentDcrOnPlaceMultiplier * currentDcrStamina + Time.deltaTime), minStamina, maxStamina);
 
         staminaValue.fillAmount = stamina / maxStamina;
+
+        previousPosition = transform.position;
 
         if (stamina == 0)
             ExitShadowMode();
@@ -227,7 +227,7 @@ public class VKThirdPersonController : MonoBehaviour {
     }
 
     public bool ExitShadowMode(GameObject target = null)
-    { 
+    {
         if (characterStatus != StatusType.isShadow) return false;
 
         characterStatus = StatusType.IsWalking;
