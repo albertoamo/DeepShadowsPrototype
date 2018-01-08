@@ -19,6 +19,7 @@ public class VKThirdPersonCamera : MonoBehaviour
     [HideInInspector] public GameObject targetLookAt;
     [HideInInspector] public GameObject dummyTarget;
     [HideInInspector] public Vector2 input;
+    [HideInInspector] public VKUtils.VKTimer timer;
 
     [Header("--- Limit/Sensitivity values ---")]
     public Vector2 xLimit = new Vector2(-360, 360);
@@ -32,27 +33,27 @@ public class VKThirdPersonCamera : MonoBehaviour
     public float maxClippingDistance = 2.5f;
     public float minClippingDistance = 0.1f;
     public float smoothCameraRotation = 12f;
+    public const float transitionSpeed = 1f;
 
     private float mouseY = 0f;
     private float mouseX = 0f;
+    private Vector3 targetPos;
     private float currentHeight;
 
     // Use this for initialization
-    void Start ()
+    public void Init (GameObject target)
     {
         // Create a dummy target to look at.
         dummyTarget = new GameObject("VKDummyTarget");
         dummyTarget.transform.parent = this.transform.parent;
+        // Create a timer to control lerps
+        timer = new VKUtils.VKTimer(transitionSpeed);
 
-        if (targetLookAt != null) SetTarget(targetLookAt);
+        SetTarget(target);
+        timer.accumTime = timer.reachTime; // Move this in future patches
+        transform.position = targetLookAt.transform.position;
     }
 	
-	// Update is called once per frame
-	void Update ()
-    {
-
-    }
-
     private void FixedUpdate()
     {
         CameraClip();
@@ -60,19 +61,20 @@ public class VKThirdPersonCamera : MonoBehaviour
         CameraRotate();
     }
 
-    public void SetTarget(GameObject newTarget)
+    public void SetTarget(GameObject newTarget, float time = 0)
     {
+        timer.Reset();
+
         targetLookAt = newTarget;
         mouseY = targetLookAt.transform.eulerAngles.x;
         mouseX = targetLookAt.transform.eulerAngles.y;
         dummyTarget.transform.position = targetLookAt.transform.position;
         dummyTarget.transform.rotation = targetLookAt.transform.rotation;
-        //dummyTarget.transform.parent = targetLookAt.transform.parent;
     }
 
     public Vector3 GetCameraDirection(Vector2 input)
     {
-        if(height == 0)
+        if(height == .5f)
             return (input.x * transform.right + input.y * transform.up).normalized;
         else
             return (input.x * transform.right + input.y * transform.forward).normalized;
@@ -94,15 +96,25 @@ public class VKThirdPersonCamera : MonoBehaviour
 
         // Get director vector to target and offset position
         Vector3 camDir = (-dummyTarget.transform.forward) + (rightOffset * dummyTarget.transform.right).normalized;
-        Vector3 targetPos = new Vector3(dummyTarget.transform.position.x, dummyTarget.transform.position.y, dummyTarget.transform.position.z);
-        targetPos += new Vector3(0, height, 0);
+        targetPos = new Vector3(dummyTarget.transform.position.x, dummyTarget.transform.position.y, dummyTarget.transform.position.z);
+        targetPos += height * targetLookAt.transform.up;
 
-        var lookPoint = targetPos + dummyTarget.transform.forward * 2f;
-        lookPoint += (dummyTarget.transform.right * Vector3.Dot(camDir * (clippingDistance), dummyTarget.transform.right));
+        Vector3 lookPoint = targetPos + dummyTarget.transform.forward * 2f;
+        //lookPoint += (dummyTarget.transform.right * Vector3.Dot(camDir * (clippingDistance), dummyTarget.transform.right));
 
-        // Apply transforms to the camera
-        transform.position = targetPos + (camDir * (clippingDistance));
-        transform.rotation = Quaternion.LookRotation((lookPoint) - transform.position);
+        // Sort of lerp timer.
+        if (timer.IsAlive())
+        {
+            Vector3 position = targetPos + (camDir * (clippingDistance));
+            Quaternion rotation = Quaternion.LookRotation((lookPoint) - transform.position);
+            transform.position = Vector3.Lerp(transform.position, position, timer.accumTime);
+            transform.rotation = Quaternion.Lerp(transform.rotation, rotation, timer.accumTime);
+        }
+        else
+        {
+            transform.position = targetPos + (camDir * (clippingDistance));
+            transform.rotation = Quaternion.LookRotation((lookPoint) - transform.position);
+        }
 
         // Apply transforms to the target
         Quaternion newRot = Quaternion.Euler(mouseY, mouseX, 0);
@@ -113,12 +125,10 @@ public class VKThirdPersonCamera : MonoBehaviour
     public void CameraClip()
     {
         // Clip camera using raycasts
-        // Rework needed here to fix special cases
-        
         RaycastHit cameraHit;
-        Vector3 direction = (transform.position - dummyTarget.transform.position).normalized;
+        Vector3 direction = (transform.position - targetPos).normalized;
 
-        if(Physics.Raycast(new Ray(dummyTarget.transform.position, direction), out cameraHit, 8, 5))
+        if(Physics.Raycast(new Ray(targetPos, direction), out cameraHit, 5, 5) && !cameraHit.collider.isTrigger)
             clippingDistance = Mathf.Clamp(cameraHit.distance - 0.2f, minClippingDistance, maxClippingDistance);
     }
 }

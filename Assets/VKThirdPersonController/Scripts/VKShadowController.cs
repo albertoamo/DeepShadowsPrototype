@@ -8,7 +8,7 @@ public class VKShadowController : MonoBehaviour
     public Material shadowPlayer;
     public bool isShadow;
 
-    private Light[] lights;
+    private static Light[] lights;
     public GameObject target;
 
     public void Init()
@@ -17,7 +17,7 @@ public class VKShadowController : MonoBehaviour
         lights = FindObjectsOfType(typeof(Light)) as Light[];
     }
 
-    public bool IsPointInShadows(Vector3 point)
+    public static bool IsPointInShadows(Vector3 point)
     {
         foreach (Light light in lights)
         {
@@ -79,6 +79,7 @@ public class VKShadowController : MonoBehaviour
         target.layer = 8;
         Vector3 ledScale = new Vector3(0.05f, 0.05f, 0.05f);
         Destroy(target.GetComponent<CapsuleCollider>());
+        target.GetComponent<MeshRenderer>().enabled = false;
 
         float nradius = (2 * (radius - 0.02f)); // Hardcoded for colliding purposes
         for (int x = 0; x < levels; x++)
@@ -107,5 +108,6 @@ public class VKShadowController : MonoBehaviour
         childSource.GetComponent<MeshRenderer>().material.color = color;
         childSource.layer = 8;
         Destroy(childSource.GetComponent<BoxCollider>());
+        childSource.GetComponent<MeshRenderer>().enabled = false;
     }
 }

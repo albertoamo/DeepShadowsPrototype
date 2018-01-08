@@ -40,7 +40,7 @@ public class VKThirdPersonInput : MonoBehaviour {
         charShadowController = FindObjectOfType<VKShadowController>();
 
         if (charController) charController.Init();
-        if (charCamera) charCamera.SetTarget(this.gameObject);
+        if (charCamera) charCamera.Init(this.gameObject);
         if (charShadowController) charShadowController.Init();
     }
 	
@@ -94,7 +94,7 @@ public class VKThirdPersonInput : MonoBehaviour {
         }
 
         // ShadowDiving related input
-        if (Input.GetMouseButtonDown(0) && charShadowController.isShadow == true) // Change status
+        if ((Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Joystick1Button5)) && charShadowController.isShadow == true) // Change status
         {
             // Fix this in the future
             if(charController.ExitShadowMode(charShadowController.target))
